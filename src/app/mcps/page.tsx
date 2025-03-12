@@ -3,18 +3,17 @@ import Image from 'next/image'
 
 import { Card } from '@/components/Card'
 import { SimpleLayout } from '@/components/SimpleLayout'
-import logoCosmos from '@/images/logos/cosmos.svg'
 import logoDBHub from '@/images/logos/dbhub.svg'
 import logoOpenShuttle from '@/images/logos/open-shuttle.svg'
 import logoPlanetaria from '@/images/logos/planetaria.svg'
 
 const projects = [
   {
-    name: 'Filesystem MCP Server',
+    name: 'DBHub MCP Server',
     description:
-      'Node.js server implementing Model Context Protocol (MCP) for filesystem operations.',
-    link: { href: 'https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem', label: '@modelcontextprotocol/server-filesystem' },
-    logo: logoCosmos,
+      'An MCP server that connects AI assistants to database systems.',
+    link: { href: 'https://github.com/bytebase/dbhub/', label: 'bytebase/dbhub' },
+    logo: logoDBHub,
   },
   {
     name: 'Brave Search MCP Server',
@@ -22,13 +21,6 @@ const projects = [
       'An MCP server that integrates the Brave Search API, providing web and local search.',
     link: { href: 'https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search', label: '@modelcontextprotocol/server-brave-search' },
     logo: logoPlanetaria,
-  },
-  {
-    name: 'DBHub MCP Server',
-    description:
-      'An MCP server that connects AI assistants to database systems.',
-    link: { href: 'https://github.com/bytebase/dbhub/', label: 'bytebase/dbhub' },
-    logo: logoDBHub,
   },
   {
     name: 'Awesome MCP Servers',
