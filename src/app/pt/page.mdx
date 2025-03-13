@@ -65,9 +65,9 @@ Essencialmente, isso transforma um problema M×N em uma solução M+N, abstraind
 
 O MCP é construído em torno de três primitivas fundamentais fornecidas pelo servidor MCP:
 
-- **Recursos**: Objetos de dados que podem ser referenciados e recuperados. Isso inclui documentos, imagens, esquemas de banco de dados e outros dados estruturados.
+- **Resources**: Objetos de dados que podem ser referenciados e recuperados. Isso inclui documentos, imagens, esquemas de banco de dados e outros dados estruturados.
 - **Prompts**: Templates para gerar interações eficazes com o modelo de linguagem, otimizados para tarefas ou domínios específicos.
-- **Ferramentas**: Funções que podem ser executadas pelo modelo de linguagem para realizar ações como consultar um banco de dados, chamar uma API ou processar dados.
+- **Tools**: Funções que podem ser executadas pelo modelo de linguagem para realizar ações como consultar um banco de dados, chamar uma API ou processar dados.
 
 Para mapear o exemplo de Text-to-SQL:
 
@@ -78,9 +78,9 @@ Para mapear o exemplo de Text-to-SQL:
 
 | Primitiva MCP | Exemplo de Text-to-SQL |
 | ------------- | ------------------------------------------------------------------------- |
-| **Recursos** | Informações de esquema extraídas do banco de dados |
+| **Resources** | Informações de esquema extraídas do banco de dados |
 | **Prompts** | Prompts específicos de domínio de banco de dados que ajudam o modelo a gerar SQL correto |
-| **Ferramentas** | Executar comandos SQL contra o banco de dados |
+| **Tool** | Executar comandos SQL contra o banco de dados |
 
 ## Benefícios Principais
 

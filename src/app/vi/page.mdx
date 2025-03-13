@@ -65,9 +65,9 @@ Về cơ bản, nó biến một vấn đề M×N thành một giải pháp M+N,
 
 MCP được xây dựng xung quanh ba thành phần cơ bản được cung cấp bởi máy chủ MCP:
 
-- **Tài nguyên (Resources)**: Các đối tượng dữ liệu có thể được tham chiếu và truy xuất. Chúng bao gồm tài liệu, hình ảnh, schema cơ sở dữ liệu và dữ liệu có cấu trúc khác.
+- **Resources**: Các đối tượng dữ liệu có thể được tham chiếu và truy xuất. Chúng bao gồm tài liệu, hình ảnh, schema cơ sở dữ liệu và dữ liệu có cấu trúc khác.
 - **Prompts**: Các mẫu để tạo ra tương tác hiệu quả với mô hình ngôn ngữ, được tối ưu hóa cho các tác vụ hoặc lĩnh vực cụ thể.
-- **Công cụ (Tools)**: Các hàm có thể được thực thi bởi mô hình ngôn ngữ để thực hiện các hành động như truy vấn cơ sở dữ liệu, gọi API hoặc xử lý dữ liệu.
+- **Tools**: Các hàm có thể được thực thi bởi mô hình ngôn ngữ để thực hiện các hành động như truy vấn cơ sở dữ liệu, gọi API hoặc xử lý dữ liệu.
 
 Để ánh xạ ví dụ Text-to-SQL:
 
@@ -78,9 +78,9 @@ MCP được xây dựng xung quanh ba thành phần cơ bản được cung c�
 
 | Thành phần cơ bản của MCP | Ví dụ Text-to-SQL |
 | ------------- | ------------------------------------------------------------------------- |
-| **Tài nguyên** | Thông tin schema được lấy từ cơ sở dữ liệu |
+| **Resources** | Thông tin schema được lấy từ cơ sở dữ liệu |
 | **Prompts** | Các prompt dành riêng cho lĩnh vực cơ sở dữ liệu giúp mô hình tạo SQL chính xác |
-| **Công cụ** | Thực thi các lệnh SQL đối với cơ sở dữ liệu |
+| **Tools** | Thực thi các lệnh SQL đối với cơ sở dữ liệu |
 
 ## Lợi ích chính
 
