@@ -29,7 +29,7 @@ custom integrations for each combination of AI application and data source. MCP 
 protocol that allows any MCP-compatible client to work with any MCP-compatible server, dramatically reducing
 integration complexity and development time.
 
-## How MCP works
+## How MCP Works
 
 > **Note:** For the detailed explanation, check the [official MCP documentation](https://modelcontextprotocol.io/docs/concepts/architecture).
 
@@ -39,7 +39,7 @@ MCP follows a client-server architecture and has five main components:
 
 <Image
   src={mcpArchitecture}
-  alt="MCP Architecture diagram showing the five main components: MCP Hosts, MCP Clients, MCP Servers, Local Data Sources, and Remote Services"
+  alt="MCP Architecture Diagram Showing the Five Main Components: MCP Hosts, MCP Clients, MCP Servers, Local Data Sources, and Remote Services"
 />
 
 - **MCP Hosts**: AI Tools (Chat clients, IDEs, Agents) that want to access data through MCP.
@@ -52,7 +52,7 @@ Let's demonstrate this by using the classic AI use case, Text-to-SQL. Text-to-SQ
 
 <Image
   src={textToSqlClassic}
-  alt="Traditional Text-to-SQL implementation workflow diagram showing the four steps: schema fetching, prompt creation, SQL generation, and execution"
+  alt="Traditional Text-to-SQL Implementation Workflow Diagram Showing the Four Steps: Schema Fetching, Prompt Creation, SQL Generation, and Execution"
 />
 
 1. SQL client fetches the schema from the target databases
@@ -65,12 +65,12 @@ MCP client protocol and each database vendor just needs to implement a MCP serve
 
 <Image
   src={databaseMcp}
-  alt="MCP-based database integration diagram showing how SQL clients connect to different database engines through the MCP protocol layer"
+  alt="MCP-Based Database Integration Diagram Showing How SQL Clients Connect to Different Database Engines Through the MCP Protocol Layer"
 />
 
 Essentially, it turns an M×N problem into an M+N solution, by abstracting with another level of indirection-the MCP.
 
-### Core primitives
+### Core Primitives
 
 MCP is built around three fundamental primitives supplied by the MCP server:
 
@@ -82,7 +82,7 @@ To map the Text-to-SQL example:
 
 <Image
   src={textToSqlMcp}
-  alt="Text-to-SQL with MCP diagram showing how MCP primitives (Resources, Prompts, and Tools) are implemented in database context"
+  alt="Text-to-SQL with MCP Diagram Showing How MCP Primitives (Resources, Prompts, and Tools) Are Implemented in Database Context"
 />
 
 | MCP Primitive | Text-to-SQL Example                                                       |
@@ -99,7 +99,7 @@ MCP offers several significant advantages for AI system development:
 - **Enhanced Interoperability**: Applications built with MCP can seamlessly work with any compatible tools and data sources—creating a truly composable ecosystem.
 - **Modularization**: Cross-cutting concerns like debugging, authing, auditing, and chaining can be standardized and implemented once, then reused across the ecosystem.
 
-## Technical precursors
+## Technical Precursors
 
 MCP builds on the success of previous standards that solved similar problems in other domains:
 
@@ -131,7 +131,7 @@ As of writing (Mar 13rd, 2025), the working group currently has five members:
 
 Besides Alexander Sysoev from JetBrains, the other four work for Anthropic. This balance is understandable as the project is still in its early stages, and having a core team from one organization can help provide clear direction during initial development.
 
-## Looking ahead
+## Looking Ahead
 
 MCP is still in its early stages. Creating a successful protocol is similar to building a marketplace—you need both suppliers and consumers to achieve critical mass.
 
