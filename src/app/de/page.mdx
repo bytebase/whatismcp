@@ -15,7 +15,125 @@ export const metadata = {
 
 export default (props) => <HomeLayout {...props} />
 
-{/* 
-  Content will be added by the user later.
-  This is just the structure with German metadata.
-*/}
+Das Model Context Protocol (MCP) ist ein offenes Protokoll, das die nahtlose Integration zwischen LLM-Anwendungen und externen Datenquellen sowie Tools ermöglicht. Es wurde am 25. November 2024 von Anthropic angekündigt.
+
+## Analogie zu USB
+
+MCP kann als „USB-Standard" für KI-Systeme betrachtet werden. So wie USB eine universelle Schnittstelle geschaffen hat, die es ermöglicht, jedes USB-Gerät mit jedem USB-Anschluss zu verbinden – und damit die Notwendigkeit gerätespezifischer Anschlüsse beseitigt –, schafft MCP einen standardisierten Weg für KI-Anwendungen, um sich mit verschiedenen Datenquellen und Tools zu verbinden.
+
+Vor USB benötigte jedes Gerät seinen eigenen proprietären Anschluss. Ähnlich mussten Entwickler vor MCP benutzerdefinierte Integrationen für jede Kombination von KI-Anwendung und Datenquelle erstellen. MCP etabliert ein gemeinsames „Plug-and-Play"-Protokoll, das es jedem MCP-kompatiblen Client ermöglicht, mit jedem MCP-kompatiblen Server zu arbeiten, was die Integrationskomplexität und Entwicklungszeit drastisch reduziert.
+
+## Wie MCP funktioniert
+
+### Architektur
+
+MCP folgt einer Client-Server-Architektur und hat fünf Hauptkomponenten:
+
+<Image
+  src={mcpArchitecture}
+  alt="MCP-Architekturdiagramm, das die fünf Hauptkomponenten zeigt: MCP-Hosts, MCP-Clients, MCP-Server, lokale Datenquellen und Remote-Dienste"
+/>
+
+- **MCP-Hosts**: KI-Tools (Chat-Clients, IDEs, Agenten), die über MCP auf Daten zugreifen möchten.
+- **MCP-Clients**: Protokoll-Clients, die 1:1-Verbindungen mit Servern aufrechterhalten.
+- **MCP-Server**: Programme, die bestimmte Funktionen über das standardisierte Model Context Protocol verfügbar machen.
+- **Lokale Datenquellen**: Lokale Datenbanken, Dateien und Dienste, die Informationen enthalten.
+- **Remote-Dienste**: Externe APIs oder Dienste, mit denen MCP-Server sich verbinden können.
+
+Lassen Sie uns dies anhand des klassischen KI-Anwendungsfalls Text-zu-SQL demonstrieren. Text-zu-SQL übersetzt natürliche Sprache in SQL. Vor MCP sah eine typische Implementierung so aus:
+
+<Image
+  src={textToSqlClassic}
+  alt="Diagramm des traditionellen Text-zu-SQL-Implementierungsablaufs, das die vier Schritte zeigt: Schema-Abruf, Prompt-Erstellung, SQL-Generierung und Ausführung"
+/>
+
+1. SQL-Client ruft das Schema von den Zieldatenbanken ab
+2. SQL-Client sendet der LLM einen Prompt mit dem Schema
+3. LLM antwortet mit dem SQL
+4. SQL-Client führt das SQL gegen die Zieldatenbank aus
+
+Ohne MCP muss jeder SQL-Client dies für jede unterstützte Datenbank implementieren. Mit MCP muss der SQL-Client lediglich das MCP-Client-Protokoll implementieren und jeder Datenbankanbieter muss einen MCP-Server nur einmal implementieren.
+
+<Image
+  src={databaseMcp}
+  alt="MCP-basiertes Datenbankintegrationsdiagramm, das zeigt, wie SQL-Clients über die MCP-Protokollschicht mit verschiedenen Datenbank-Engines verbunden werden"
+/>
+
+Im Wesentlichen wird ein M×N-Problem durch eine weitere Abstraktionsebene – das MCP – in eine M+N-Lösung umgewandelt.
+
+### Kernprimitive
+
+MCP basiert auf drei grundlegenden Primitiven, die vom MCP-Server bereitgestellt werden:
+
+- **Ressourcen**: Datenobjekte, auf die verwiesen und die abgerufen werden können. Dazu gehören Dokumente, Bilder, Datenbankschemata und andere strukturierte Daten.
+- **Prompts**: Vorlagen für effektive Interaktionen mit dem Sprachmodell, optimiert für bestimmte Aufgaben oder Domänen.
+- **Tools**: Funktionen, die vom Sprachmodell ausgeführt werden können, um Aktionen wie Datenbankabfragen, API-Aufrufe oder Datenverarbeitung durchzuführen.
+
+Bezogen auf das Text-zu-SQL-Beispiel:
+
+<Image
+  src={textToSqlMcp}
+  alt="Text-zu-SQL mit MCP-Diagramm, das zeigt, wie MCP-Primitive (Ressourcen, Prompts und Tools) im Datenbankkontext implementiert werden"
+/>
+
+| MCP-Primitiv | Text-zu-SQL-Beispiel |
+| ------------- | ------------------------------------------------------------------------- |
+| **Ressourcen** | Aus der Datenbank extrahierte Schemainformationen |
+| **Prompts** | Datenbankdomänenspezifische Prompts, die dem Modell helfen, korrektes SQL zu generieren |
+| **Tools** | SQL-Befehle gegen die Datenbank ausführen |
+
+## Hauptvorteile
+
+MCP bietet mehrere signifikante Vorteile für die Entwicklung von KI-Systemen:
+
+- **Reduzierte Entwicklungszeit**: Entwickler können vorgefertigte MCP-Server für gängige Aufgaben nutzen, anstatt benutzerdefinierte Integrationen für jede Datenquelle oder jedes Tool zu erstellen.
+- **Verbesserte Interoperabilität**: Mit MCP erstellte Anwendungen können nahtlos mit allen kompatiblen Tools und Datenquellen zusammenarbeiten – und schaffen so ein wirklich komponierbar­es Ökosystem.
+- **Modularisierung**: Übergreifende Aspekte wie Debugging, Authentifizierung, Auditing und Verkettung können standardisiert und einmalig implementiert werden, um dann im gesamten Ökosystem wiederverwendet zu werden.
+
+## Technische Vorläufer
+
+MCP baut auf dem Erfolg früherer Standards auf, die ähnliche Probleme in anderen Bereichen gelöst haben:
+
+- **SQL**: Schuf eine standardisierte Möglichkeit, mit Datenbanken zu interagieren, sodass Anwendungen mit jeder SQL-kompatiblen Datenbank arbeiten können.
+- **Docker**: Standardisierte das Verpacken und Bereitstellen von Anwendungen, wodurch Anwendungen zwischen verschiedenen Umgebungen portierbar wurden.
+- **LSP (Language Server Protocol)**: Die Namensähnlichkeit ist kein Zufall – LSP standardisierte, wie Code-Editoren mit verschiedenen Programmiersprachenservern für Funktionen wie Code-Vervollständigung, Syntaxhervorhebung und Fehlerprüfung kommunizieren.
+
+All diese Standards haben M×N-Probleme gelöst, indem sie eine Abstraktionsschicht einführten, die Clients von Implementierungen trennte und so die Integrationskomplexität erheblich reduzierte.
+
+## Offenheit
+
+Der berühmte [xkcd 927](https://xkcd.com/927/)-Comic erinnert uns an die Herausforderung, noch einen weiteren Standard zu schaffen:
+
+<Image
+  src={xkcdStandards}
+  alt="XKCD-Comic #927: Standards - Zeigt, wie konkurrierende Standards proliferieren, anstatt zu vereinheitlichen"
+/>
+
+Allerdings zeigt MCP vielversprechende Anzeichen echter Offenheit.
+
+Obwohl MCP von Anthropic erfunden wurde, haben sie es unter eine separate Organisation gestellt ([github.com/modelcontextprotocol](https://github.com/modelcontextprotocol)), was ihr Engagement zeigt, es zu einem offenen Standard anstatt zu einer proprietären Lösung zu machen.
+
+Zum Zeitpunkt der Erstellung dieses Textes (13. März 2025) hat die Arbeitsgruppe fünf Mitglieder:
+
+<Image
+  src={mcpMembers}
+  alt="Model Context Protocol-Arbeitsgruppenmitglieder, die die fünf Mitwirkenden mit ihren Rollen und Zugehörigkeiten zeigen"
+/>
+
+Außer Alexander Sysoev von JetBrains arbeiten die anderen vier für Anthropic. Dieses Gleichgewicht ist verständlich, da sich das Projekt noch in den Anfängen befindet, und ein Kernteam aus einer Organisation kann helfen, während der anfänglichen Entwicklung eine klare Richtung vorzugeben.
+
+## Ausblick
+
+MCP befindet sich noch in der Anfangsphase. Die Erstellung eines erfolgreichen Protokolls ähnelt dem Aufbau eines Marktes – man benötigt sowohl Anbieter als auch Verbraucher, um eine kritische Masse zu erreichen.
+
+Es gibt jedoch Grund zum Optimismus. Das MCP-Ökosystem scheint die anfängliche Adoptionshürde überwunden zu haben, mit mehr Agenten (MCP-Clients), die entstehen, und einer wachsenden Anzahl von MCP-Servern, die jede Woche entwickelt werden, um domänenspezifische Aufgaben zu lösen.
+
+Aus technischer Sicht ähnelt MCP am ehesten LSP, das im Codierungsbereich großen Erfolg erzielt hat. Langfristig könnte MCP so wichtig werden wie SQL, um zur Lingua franca in der KI-nativen Ära zu werden.
+
+> **Hinweis:** Wenn Sie ein MCP-Server-Entwickler sind, können Sie auch [meine Entwicklungsnotizen](/articles/notes-on-implementing-mcp-server) lesen.
+
+## Referenzen
+
+- [Einführung des Model Context Protocol](https://www.anthropic.com/news/model-context-protocol)
+- [Offizielle MCP-Dokumentation](https://modelcontextprotocol.io/introduction)
+- [MCP: Modeerscheinung oder künftiger Standard?](https://blog.langchain.dev/mcp-fad-or-fixture/)

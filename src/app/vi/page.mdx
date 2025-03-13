@@ -15,7 +15,125 @@ export const metadata = {
 
 export default (props) => <HomeLayout {...props} />
 
-{/* 
-  Content will be added by the user later.
-  This is just the structure with Vietnamese metadata.
-*/}
+Model Context Protocol (MCP) là một giao thức mở cho phép tích hợp liền mạch giữa các ứng dụng LLM và nguồn dữ liệu cùng công cụ bên ngoài. Nó được Anthropic công bố vào ngày 25 tháng 11 năm 2024.
+
+## So sánh với USB
+
+MCP có thể được xem như "chuẩn USB" cho các hệ thống AI. Giống như USB đã tạo ra một giao diện phổ quát cho phép bất kỳ thiết bị USB nào cũng có thể kết nối với bất kỳ cổng USB nào—loại bỏ nhu cầu về các đầu kết nối dành riêng cho từng thiết bị—MCP tạo ra một cách tiêu chuẩn hóa để các ứng dụng AI kết nối với nhiều nguồn dữ liệu và công cụ khác nhau.
+
+Trước khi có USB, mỗi thiết bị đều cần đầu kết nối độc quyền riêng. Tương tự, trước khi có MCP, các nhà phát triển phải tạo ra các tích hợp tùy chỉnh cho mỗi sự kết hợp giữa ứng dụng AI và nguồn dữ liệu. MCP thiết lập một giao thức "cắm là chạy" chung cho phép bất kỳ ứng dụng khách tương thích MCP nào cũng có thể làm việc với bất kỳ máy chủ tương thích MCP nào, giảm đáng kể độ phức tạp của việc tích hợp và thời gian phát triển.
+
+## Cách MCP hoạt động
+
+### Kiến trúc
+
+MCP tuân theo kiến trúc khách-máy chủ và có năm thành phần chính:
+
+<Image
+  src={mcpArchitecture}
+  alt="Sơ đồ Kiến trúc MCP Hiển thị Năm Thành phần Chính: MCP Hosts, MCP Clients, MCP Servers, Local Data Sources và Remote Services"
+/>
+
+- **Máy chủ MCP (MCP Hosts)**: Các công cụ AI (ứng dụng trò chuyện, IDE, tác nhân) muốn truy cập dữ liệu thông qua MCP.
+- **Ứng dụng khách MCP (MCP Clients)**: Các ứng dụng khách giao thức duy trì kết nối 1:1 với máy chủ.
+- **Máy chủ MCP (MCP Servers)**: Các chương trình hiển thị các khả năng cụ thể thông qua Giao thức ngữ cảnh mô hình được chuẩn hóa.
+- **Nguồn dữ liệu cục bộ (Local Data Sources)**: Cơ sở dữ liệu, tệp và dịch vụ cục bộ chứa thông tin.
+- **Dịch vụ từ xa (Remote Services)**: API hoặc dịch vụ bên ngoài mà máy chủ MCP có thể kết nối.
+
+Hãy minh họa điều này bằng cách sử dụng trường hợp sử dụng AI cổ điển, Text-to-SQL. Text-to-SQL dịch ngôn ngữ tự nhiên sang SQL. Trước MCP, một triển khai điển hình:
+
+<Image
+  src={textToSqlClassic}
+  alt="Sơ đồ Quy trình Triển khai Text-to-SQL Truyền thống Hiển thị Bốn Bước: Lấy Schema, Tạo Prompt, Tạo SQL và Thực thi"
+/>
+
+1. Ứng dụng khách SQL lấy schema từ cơ sở dữ liệu mục tiêu
+2. Ứng dụng khách SQL gửi cho LLM một prompt chứa schema
+3. LLM trả lời với SQL
+4. Ứng dụng khách SQL thực thi SQL đối với cơ sở dữ liệu mục tiêu
+
+Nếu không có MCP, mỗi ứng dụng khách SQL cần phải triển khai điều này cho mỗi cơ sở dữ liệu được hỗ trợ. Với MCP, ứng dụng khách SQL chỉ cần triển khai giao thức khách MCP và mỗi nhà cung cấp cơ sở dữ liệu chỉ cần triển khai máy chủ MCP một lần.
+
+<Image
+  src={databaseMcp}
+  alt="Sơ đồ Tích hợp Cơ sở Dữ liệu dựa trên MCP Hiển thị Cách Ứng dụng Khách SQL Kết nối với Các Động cơ Cơ sở Dữ liệu Khác nhau Thông qua Lớp Giao thức MCP"
+/>
+
+Về cơ bản, nó biến một vấn đề M×N thành một giải pháp M+N, bằng cách trừu tượng hóa với một cấp độ gián tiếp khác - MCP.
+
+### Các thành phần cơ bản
+
+MCP được xây dựng xung quanh ba thành phần cơ bản được cung cấp bởi máy chủ MCP:
+
+- **Tài nguyên (Resources)**: Các đối tượng dữ liệu có thể được tham chiếu và truy xuất. Chúng bao gồm tài liệu, hình ảnh, schema cơ sở dữ liệu và dữ liệu có cấu trúc khác.
+- **Prompts**: Các mẫu để tạo ra tương tác hiệu quả với mô hình ngôn ngữ, được tối ưu hóa cho các tác vụ hoặc lĩnh vực cụ thể.
+- **Công cụ (Tools)**: Các hàm có thể được thực thi bởi mô hình ngôn ngữ để thực hiện các hành động như truy vấn cơ sở dữ liệu, gọi API hoặc xử lý dữ liệu.
+
+Để ánh xạ ví dụ Text-to-SQL:
+
+<Image
+  src={textToSqlMcp}
+  alt="Sơ đồ Text-to-SQL với MCP Hiển thị Cách Thành phần Cơ bản của MCP (Tài nguyên, Prompts và Công cụ) Được Triển khai trong Bối cảnh Cơ sở Dữ liệu"
+/>
+
+| Thành phần cơ bản của MCP | Ví dụ Text-to-SQL |
+| ------------- | ------------------------------------------------------------------------- |
+| **Tài nguyên** | Thông tin schema được lấy từ cơ sở dữ liệu |
+| **Prompts** | Các prompt dành riêng cho lĩnh vực cơ sở dữ liệu giúp mô hình tạo SQL chính xác |
+| **Công cụ** | Thực thi các lệnh SQL đối với cơ sở dữ liệu |
+
+## Lợi ích chính
+
+MCP mang lại một số lợi thế đáng kể cho việc phát triển hệ thống AI:
+
+- **Giảm thời gian phát triển**: Các nhà phát triển có thể tận dụng các máy chủ MCP đã được xây dựng sẵn cho các tác vụ phổ biến thay vì xây dựng tích hợp tùy chỉnh cho mỗi nguồn dữ liệu hoặc công cụ.
+- **Tăng cường khả năng tương tác**: Các ứng dụng được xây dựng với MCP có thể hoạt động liền mạch với bất kỳ công cụ và nguồn dữ liệu tương thích nào—tạo ra một hệ sinh thái thực sự có thể kết hợp.
+- **Mô-đun hóa**: Các mối quan tâm chung như gỡ lỗi, xác thực, kiểm toán và chuỗi có thể được chuẩn hóa và triển khai một lần, sau đó được tái sử dụng trong toàn bộ hệ sinh thái.
+
+## Tiền lệ kỹ thuật
+
+MCP dựa trên thành công của các tiêu chuẩn trước đây đã giải quyết các vấn đề tương tự trong các lĩnh vực khác:
+
+- **SQL**: Tạo ra một cách tiêu chuẩn hóa để tương tác với cơ sở dữ liệu, cho phép các ứng dụng làm việc với bất kỳ cơ sở dữ liệu tương thích SQL nào.
+- **Docker**: Tiêu chuẩn hóa việc đóng gói và triển khai ứng dụng, làm cho các ứng dụng có thể di chuyển giữa các môi trường khác nhau.
+- **LSP (Language Server Protocol)**: Sự giống nhau về tên không phải ngẫu nhiên—LSP đã tiêu chuẩn hóa cách trình soạn thảo mã giao tiếp với các máy chủ ngôn ngữ lập trình khác nhau cho các tính năng như hoàn thành mã, làm nổi bật cú pháp, kiểm tra lỗi.
+
+Tất cả các tiêu chuẩn này đều giải quyết các vấn đề M×N bằng cách giới thiệu một lớp trừu tượng tách biệt ứng dụng khách khỏi các triển khai, giảm đáng kể độ phức tạp của việc tích hợp.
+
+## Tính mở
+
+Truyện tranh [xkcd 927](https://xkcd.com/927/) nổi tiếng nhắc nhở chúng ta về thách thức khi tạo ra một tiêu chuẩn khác:
+
+<Image
+  src={xkcdStandards}
+  alt="Truyện tranh XKCD #927: Tiêu chuẩn - Minh họa cách các tiêu chuẩn cạnh tranh sinh sôi thay vì thống nhất"
+/>
+
+Tuy nhiên, MCP cho thấy những dấu hiệu đầy hứa hẹn về sự cởi mở thực sự.
+
+Mặc dù MCP được Anthropic phát minh, họ đã đặt nó dưới một tổ chức riêng biệt ([github.com/modelcontextprotocol](https://github.com/modelcontextprotocol)), phản ánh cam kết của họ trong việc biến nó thành một tiêu chuẩn mở thay vì một giải pháp độc quyền.
+
+Tại thời điểm viết bài (ngày 13 tháng 3 năm 2025), nhóm làm việc hiện có năm thành viên:
+
+<Image
+  src={mcpMembers}
+  alt="Các thành viên nhóm làm việc Model Context Protocol hiển thị năm người đóng góp với vai trò và tổ chức của họ"
+/>
+
+Ngoài Alexander Sysoev từ JetBrains, bốn người còn lại làm việc cho Anthropic. Sự cân bằng này là dễ hiểu vì dự án vẫn đang trong giai đoạn đầu, và việc có một nhóm cốt lõi từ một tổ chức có thể giúp cung cấp hướng đi rõ ràng trong quá trình phát triển ban đầu.
+
+## Nhìn về tương lai
+
+MCP vẫn đang ở giai đoạn đầu. Việc tạo ra một giao thức thành công tương tự như việc xây dựng một thị trường—bạn cần cả nhà cung cấp và người tiêu dùng để đạt được khối lượng quan trọng.
+
+Tuy nhiên, có lý do để lạc quan. Hệ sinh thái MCP dường như đã vượt qua rào cản áp dụng ban đầu, với nhiều tác nhân (ứng dụng khách MCP) xuất hiện và số lượng máy chủ MCP ngày càng tăng được phát triển mỗi tuần để giải quyết các tác vụ dành riêng cho từng lĩnh vực.
+
+Từ góc độ kỹ thuật, MCP giống nhất với LSP, vốn đã đạt được thành công lớn trong lĩnh vực lập trình. Về lâu dài, MCP có thể quan trọng như SQL để trở thành ngôn ngữ chung trong kỷ nguyên bản địa AI.
+
+> **Lưu ý:** Nếu bạn là nhà phát triển máy chủ MCP, bạn cũng có thể đọc [ghi chú phát triển của tôi](/articles/notes-on-implementing-mcp-server).
+
+## Tài liệu tham khảo
+
+- [Giới thiệu Model Context Protocol](https://www.anthropic.com/news/model-context-protocol)
+- [Tài liệu chính thức MCP](https://modelcontextprotocol.io/introduction)
+- [MCP: Hiện tượng nhất thời hay Tiêu chuẩn tương lai?](https://blog.langchain.dev/mcp-fad-or-fixture/)
