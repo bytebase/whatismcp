@@ -1,0 +1,133 @@
+import { HomeLayout } from '@/components/HomeLayout'
+import Image from 'next/image'
+import xkcdStandards from '@/images/posts/home/xkcd-standards.webp'
+import mcpArchitecture from '@/images/posts/home/mcp-architecture.webp'
+import mcpMembers from '@/images/posts/home/mcp-members.webp'
+
+export const metadata = {
+  title: 'What is MCP? (Model Context Protocol) - A Primer',
+  description:
+    'The Model Context Protocol (MCP) is an open standard for managing context in AI systems.',
+}
+
+export default (props) => <HomeLayout {...props} />
+
+The Model Context Protocol (MCP) is an open protocol that enables seamless integration between LLM
+applications and external data sources and tools. It was announced by Anthropic on November 25, 2024.
+
+## Analogy to USB
+
+MCP can be thought of as the "USB standard" for AI systems. Just as USB created a universal interface that allows
+any USB device to connect to any USB port—eliminating the need for device-specific connectors—MCP creates a
+standardized way for AI applications to connect with various data sources and tools.
+
+Before USB, each device required its own proprietary connector. Similarly, before MCP, developers had to create
+custom integrations for each combination of AI application and data source. MCP establishes a common "plug and play"
+protocol that allows any MCP-compatible client to work with any MCP-compatible server, dramatically reducing
+integration complexity and development time.
+
+## How MCP works
+
+> **Note:** For the detailed explanation, check the [official MCP documentation](https://modelcontextprotocol.io/docs/concepts/architecture).
+
+### Architecture
+
+MCP follows a client-server architecture and has five main components:
+
+<Image
+  src={mcpArchitecture}
+  alt="MCP Architecture diagram showing the relationship between hosts, clients, servers, and data sources"
+  width={700}
+  height={400}
+/>
+
+- **MCP Hosts**: AI Tools (Chat clients, IDEs, Agents) that want to access data through MCP.
+- **MCP Clients**: Protocol clients that maintain 1:1 connections with servers.
+- **MCP Servers**: Programs that each expose specific capabilities through the standardized Model Context Protocol.
+- **Local Data Sources**: Local databases, files, and services that contain information.
+- **Remote Services**: External APIs or services that MCP servers can connect to.
+
+Let's demonstrate this by using the classic AI use case, Text-to-SQL. Text-to-SQL translates natural language to SQL. A typical implementation:
+
+1. SQL client fetches the schema from the target databases
+2. SQL client sends LLM a prompt containing the schema, and LLM replies with the SQL
+3. SQL client executes the SQL against the target database
+
+Before MCP, every SQL client needs to implement this for every supported database. With MCP, the SQL Client just needs to implement the
+MCP client protocol and each database vendor just needs to implement a MCP server once.
+
+Essentially, it turns an M×N problem into an M+N solution, by abstracting with another level of indirection.
+
+### Core primitives
+
+MCP is built around three fundamental primitives supplied by the MCP server:
+
+- **Resources**: Data objects that can be referenced and retrieved. These include documents, images, database schemas, and other structured data.
+- **Prompts**: Templates for generating effective interactions with the language model, optimized for specific tasks or domains.
+- **Tools**: Functions that can be executed by the language model to perform actions like querying a database, calling an API, or processing data.
+
+To map the Text-to-SQL example:
+
+| MCP Primitive | Text-to-SQL Example                                                       |
+| ------------- | ------------------------------------------------------------------------- |
+| **Resources** | Schema information pulled from the database                               |
+| **Prompts**   | Database domain-specific prompts that help the model generate correct SQL |
+| **Tools**     | Execute SQL commands against the database                                 |
+
+## Key Benefits
+
+MCP offers several significant advantages for AI system development:
+
+- **Reduced Development Time**: Developers can leverage pre-built MCP servers for common tasks instead of building custom integrations for each data source or tool.
+- **Enhanced Interoperability**: Applications built with MCP can seamlessly work with any compatible tools and data sources—creating a truly composable ecosystem.
+- **Modularization**: Cross-cutting concerns like debugging, authing, auditing, and chaining can be standardized and implemented once, then reused across the ecosystem.
+
+## Technical precursors
+
+MCP builds on the success of previous standards that solved similar problems in other domains:
+
+- **SQL**: Created a standardized way to interact with databases, allowing applications to work with any SQL-compatible database.
+- **Docker**: Standardized application packaging and deployment, making applications portable across different environments.
+- **LSP (Language Server Protocol)**: The name resemblance is no coincidence—LSP standardized how code editors communicate with different programming language servers for features like code completion, syntax highlighting, error checking.
+
+These standards all addressed M×N problems by introducing an abstraction layer that separated clients from implementations, greatly reducing integration complexity.
+
+## Openness
+
+The infamous [xkcd 927](https://xkcd.com/927/) comic reminds us of the challenge of creating yet another standard:
+
+<Image
+  src={xkcdStandards}
+  alt="XKCD comic #927: Standards - How standards proliferate"
+  width={550}
+  height={300}
+/>
+
+However, MCP shows promising signs of genuine openness.
+
+Though MCP was invented by Anthropic, they've placed it under a separate organization ([github.com/modelcontextprotocol](https://github.com/modelcontextprotocol)), signaling their commitment to making it an open standard rather than a proprietary solution.
+
+As of writing (Mar 13rd, 2025), the working group currently has five members:
+
+<Image
+  src={mcpMembers}
+  alt="Model Context Protocol working group members"
+  width={650}
+  height={350}
+/>
+
+Besides Alexander Sysoev from JetBrains, the other four work for Anthropic. This balance is understandable as the project is still in its early stages, and having a core team from one organization can help provide clear direction during initial development.
+
+## Looking ahead
+
+MCP is still in its early stages. Creating a successful protocol is similar to building a marketplace—you need both suppliers and consumers to achieve critical mass.
+
+However, there's reason for optimism. The MCP ecosystem appears to have overcome the initial adoption hurdle, with more agents (MCP clients) emerging and an increasing number of MCP servers being developed each week to solve domain-specific tasks.
+
+From the technical perspective, MSP mostly resembles LSP which has achieved great success in its domain. In the long term, MSP could be as important as SQL to become the lingua franca in the AI-native era.
+
+## References
+
+- [Introducing the Model Context Protocol](https://www.anthropic.com/news/model-context-protocol)
+- [MCP official docs](https://modelcontextprotocol.io/introduction)
+- [MCP: Flash in the Pan or Future Standard?](https://blog.langchain.dev/mcp-fad-or-fixture/)
