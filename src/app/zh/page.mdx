@@ -8,11 +8,132 @@ import textToSqlClassic from '@/images/posts/home/text-to-sql-classic.webp'
 import textToSqlMcp from '@/images/posts/home/text-to-sql-mcp.webp'
 
 export const metadata = {
-  title: '究竟什么是 MCP? (Model Context Protocol) - 入门指南',
+  title: '究竟什么是 MCP？(Model Context Protocol) - 入门指南',
   description:
-    'Model Context Protocol (MCP)技术入门指南。MCP是由Anthropic创建的开放协议，可实现LLM应用程序与外部数据源和工具的无缝集成。',
+    'Model Context Protocol (MCP) 技术入门指南。MCP 是由 Anthropic 创建的开放协议，可实现 LLM 应用程序与外部数据源和工具的无缝集成。',
 }
 
-export default (props) => <HomeLayout {...props} /
+export default (props) => <HomeLayout {...props} />
 
->
+Model Context Protocol (MCP) 是一种开放协议，它实现了 LLM 应用程序与外部数据源和工具的无缝集成。该协议由 Anthropic 于 2024 年 11 月 25 日发布。
+
+## 与 USB 的类比
+
+MCP 可以被视为 AI 系统的「USB 标准」。正如 USB 创建了一个通用接口，允许任何 USB 设备连接到任何 USB 端口——消除了对特定设备连接器的需求——MCP 创建了一种标准化的方式，使 AI 应用程序能够连接各种数据源和工具。
+
+在 USB 出现之前，每个设备都需要自己专有的连接器。同样，在 MCP 之前，开发人员必须为每种 AI 应用程序和数据源的组合创建自定义集成。MCP 建立了一个通用的「即插即用」协议，允许任何兼容 MCP 的客户端与任何兼容 MCP 的服务器协同工作，大大降低了集成复杂性和开发时间。
+
+## MCP 如何工作
+
+### 架构
+
+MCP 遵循客户端-服务器架构，有五个主要组件：
+
+<Image
+  src={mcpArchitecture}
+  alt="MCP 架构图展示了五个主要组件：MCP 主机、MCP 客户端、MCP 服务器、本地数据源和远程服务"
+/>
+
+- **MCP 主机**：想要通过 MCP 访问数据的 AI 工具（聊天客户端、IDE、智能体）。
+- **MCP 客户端**：与服务器保持 1:1 连接的协议客户端。
+- **MCP 服务器**：通过标准化的 Model Context Protocol 暴露特定功能的程序。
+- **本地数据源**：包含信息的本地数据库、文件和服务。
+- **远程服务**：MCP 服务器可以连接的外部 API 或服务。
+
+让我们用经典的 AI 用例——文本到 SQL 转换来演示这一点。文本到 SQL 将自然语言转换为 SQL。在 MCP 之前，典型的实现是：
+
+<Image
+  src={textToSqlClassic}
+  alt="传统文本到 SQL 实现工作流程图，显示四个步骤：架构获取、提示创建、SQL 生成和执行"
+/>
+
+1. SQL 客户端从目标数据库获取架构
+2. SQL 客户端向 LLM 发送包含架构的提示
+3. LLM 回复 SQL 语句
+4. SQL 客户端针对目标数据库执行 SQL
+
+没有 MCP，每个 SQL 客户端都需要为每个支持的数据库实现这一点。有了 MCP，SQL 客户端只需实现 MCP 客户端协议，而每个数据库供应商只需实现一次 MCP 服务器。
+
+<Image
+  src={databaseMcp}
+  alt="基于 MCP 的数据库集成图，显示 SQL 客户端如何通过 MCP 协议层连接到不同的数据库引擎"
+/>
+
+本质上，它通过 MCP 的另一层抽象，将 M×N 问题转变为 M+N 解决方案。
+
+### 核心原语
+
+MCP 围绕 MCP 服务器提供的三个基本原语构建：
+
+- **资源**：可以被引用和检索的数据对象。这些包括文档、图像、数据库架构和其他结构化数据。
+- **提示**：为生成与语言模型的有效交互而优化的模板，针对特定任务或领域。
+- **工具**：语言模型可以执行的函数，用于执行查询数据库、调用 API 或处理数据等操作。
+
+映射到文本到 SQL 示例：
+
+<Image
+  src={textToSqlMcp}
+  alt="带有 MCP 的文本到 SQL 图，显示 MCP 原语（资源、提示和工具）如何在数据库上下文中实现"
+/>
+
+| MCP 原语 | 文本到 SQL 示例 |
+| ------------- | ------------------------------------------------------------------------- |
+| **资源** | 从数据库提取的架构信息 |
+| **提示** | 帮助模型生成正确 SQL 的数据库领域特定提示 |
+| **工具** | 针对数据库执行 SQL 命令 |
+
+## 主要优势
+
+MCP 为 AI 系统开发提供了几个显著优势：
+
+- **减少开发时间**：开发人员可以利用预构建的 MCP 服务器完成常见任务，而不是为每个数据源或工具构建自定义集成。
+- **增强互操作性**：使用 MCP 构建的应用程序可以与任何兼容的工具和数据源无缝协作——创建一个真正可组合的生态系统。
+- **模块化**：调试、授权、审计和链接等贯穿各处的关注点可以标准化并实现一次，然后在整个生态系统中重复使用。
+
+## 技术先驱
+
+MCP 建立在之前解决其他领域类似问题的成功标准之上：
+
+- **SQL**：创建了与数据库交互的标准化方式，使应用程序能够与任何兼容 SQL 的数据库协同工作。
+- **Docker**：标准化应用程序打包和部署，使应用程序可在不同环境中移植。
+- **LSP（语言服务器协议）**：名称相似并非巧合——LSP 标准化了代码编辑器与不同编程语言服务器的通信方式，用于代码补全、语法高亮、错误检查等功能。
+
+这些标准都通过引入一个将客户端与实现分离的抽象层来解决 M×N 问题，大大降低了集成复杂性。
+
+## 开放性
+
+著名的 [xkcd 927](https://xkcd.com/927/) 漫画提醒我们创建另一个标准的挑战：
+
+<Image
+  src={xkcdStandards}
+  alt="XKCD 漫画 #927：标准 - 说明竞争标准如何增加而不是统一"
+/>
+
+然而，MCP 显示出真正开放的有希望迹象。
+
+虽然 MCP 是由 Anthropic 发明的，但他们将其置于单独的组织下（[github.com/modelcontextprotocol](https://github.com/modelcontextprotocol)），表明他们致力于将其打造成开放标准而非专有解决方案。
+
+截至撰写时（2025 年 3 月 13 日），工作组目前有五名成员：
+
+<Image
+  src={mcpMembers}
+  alt="Model Context Protocol 工作组成员，显示五位贡献者及其角色和所属机构"
+/>
+
+除了来自 JetBrains 的 Alexander Sysoev 外，其他四人都在 Anthropic 工作。这种平衡是可以理解的，因为该项目仍处于早期阶段，而且来自一个组织的核心团队可以在初始开发期间提供明确的方向。
+
+## 展望未来
+
+MCP 仍处于早期阶段。创建成功的协议类似于建立市场——你需要供应商和消费者双方才能达到临界质量。
+
+然而，有理由保持乐观。MCP 生态系统似乎已经克服了最初的采用障碍，越来越多的代理（MCP 客户端）出现，每周开发的 MCP 服务器数量也在增加，用于解决特定领域的任务。
+
+从技术角度看，MCP 大体上类似于在编码领域取得巨大成功的 LSP。从长远来看，MCP 可能像 SQL 一样重要，成为 AI 原生时代的通用语言。
+
+> **注意：** 如果你是 MCP 服务器开发者，你也可以阅读[我的开发笔记](/articles/notes-on-implementing-mcp-server)。
+
+## 参考资料
+
+- [介绍 Model Context Protocol](https://www.anthropic.com/news/model-context-protocol)
+- [MCP 官方文档](https://modelcontextprotocol.io/introduction)
+- [MCP：昙花一现还是未来标准？](https://blog.langchain.dev/mcp-fad-or-fixture/)
