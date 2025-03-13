@@ -1,0 +1,21 @@
+import { HomeLayout } from '@/components/HomeLayout'
+import Image from 'next/image'
+import xkcdStandards from '@/images/posts/home/xkcd-standards.webp'
+import mcpArchitecture from '@/images/posts/home/mcp-architecture.webp'
+import mcpMembers from '@/images/posts/home/mcp-members.webp'
+import databaseMcp from '@/images/posts/home/database-mcp.webp'
+import textToSqlClassic from '@/images/posts/home/text-to-sql-classic.webp'
+import textToSqlMcp from '@/images/posts/home/text-to-sql-mcp.webp'
+
+export const metadata = {
+  title: 'MCP란 무엇인가? (Model Context Protocol) - 입문서',
+  description:
+    'Model Context Protocol (MCP)에 관한 기술 입문서. MCP는 Anthropic이 만든 오픈 프로토콜로, LLM 애플리케이션과 외부 데이터 소스 및 도구 간의 원활한 통합을 가능하게 합니다.',
+}
+
+export default (props) => <HomeLayout {...props} />
+
+{/* 
+  Content will be added by the user later.
+  This is just the structure with Korean metadata.
+*/}

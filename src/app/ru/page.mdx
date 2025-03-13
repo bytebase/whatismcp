@@ -1,0 +1,21 @@
+import { HomeLayout } from '@/components/HomeLayout'
+import Image from 'next/image'
+import xkcdStandards from '@/images/posts/home/xkcd-standards.webp'
+import mcpArchitecture from '@/images/posts/home/mcp-architecture.webp'
+import mcpMembers from '@/images/posts/home/mcp-members.webp'
+import databaseMcp from '@/images/posts/home/database-mcp.webp'
+import textToSqlClassic from '@/images/posts/home/text-to-sql-classic.webp'
+import textToSqlMcp from '@/images/posts/home/text-to-sql-mcp.webp'
+
+export const metadata = {
+  title: 'Что такое MCP? (Model Context Protocol) - Введение',
+  description:
+    'Техническое введение в Model Context Protocol (MCP), открытый протокол, созданный Anthropic, который обеспечивает бесшовную интеграцию между приложениями LLM и внешними источниками данных и инструментами.',
+}
+
+export default (props) => <HomeLayout {...props} />
+
+{/* 
+  Content will be added by the user later.
+  This is just the structure with Russian metadata.
+*/}

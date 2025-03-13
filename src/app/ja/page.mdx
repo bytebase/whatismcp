@@ -1,0 +1,21 @@
+import { HomeLayout } from '@/components/HomeLayout'
+import Image from 'next/image'
+import xkcdStandards from '@/images/posts/home/xkcd-standards.webp'
+import mcpArchitecture from '@/images/posts/home/mcp-architecture.webp'
+import mcpMembers from '@/images/posts/home/mcp-members.webp'
+import databaseMcp from '@/images/posts/home/database-mcp.webp'
+import textToSqlClassic from '@/images/posts/home/text-to-sql-classic.webp'
+import textToSqlMcp from '@/images/posts/home/text-to-sql-mcp.webp'
+
+export const metadata = {
+  title: 'MCPとは何か? (Model Context Protocol) - 入門ガイド',
+  description:
+    'Model Context Protocol (MCP)の技術入門ガイド。MCPはAnthropicによって作成されたオープンプロトコルで、LLMアプリケーションと外部データソースやツールのシームレスな統合を可能にします。',
+}
+
+export default (props) => <HomeLayout {...props} />
+
+{/* 
+  Content will be added by the user later.
+  This is just the structure with Japanese metadata.
+*/}
