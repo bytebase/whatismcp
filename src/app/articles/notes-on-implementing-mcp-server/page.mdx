@@ -3,7 +3,7 @@ import { ArticleLayout } from '@/components/ArticleLayout'
 export const article = {
   author: 'Tianzhou',
   date: '2025-03-13',
-  title: 'Notes on Implementing a MCP Server',
+  title: 'Notes on Implementing an MCP Server',
   description:
     'A practical guide on implementing a Model Context Protocol (MCP) server from scratch, covering architecture decisions, challenges, and best practices.',
 }
@@ -14,3 +14,86 @@ export const metadata = {
 }
 
 export default (props) => <ArticleLayout article={article} {...props} />
+
+Based on my experience implementing a [database MCP server](https://github.com/bytebase/dbhub/) written in TypeScript.
+
+## Things I Like
+
+### Choose JSON-RPC as the RPC Protocol
+
+The two viable options for MCP were JSON-RPC and gRPC. I appreciate that MCP chose the former.
+Although gRPC is more efficient, a JSON-based plain text protocol is more approachable. This
+accessibility is important for MCP to achieve widespread adoption and aligns with the trend of
+making development more accessible to a broader audience.
+
+### Good Documentation
+
+The [MCP documentation](https://modelcontextprotocol.io/introduction) is clear, with [helpful examples](https://modelcontextprotocol.io/examples) that demonstrate practical implementations.
+
+### Decent Debugging Tools
+
+The [Inspector tool](https://modelcontextprotocol.io/docs/tools/inspector) has been invaluable. Beyond troubleshooting issues, I've used the Inspector to better understand MCP concepts.
+
+I also use Claude Desktop for end-to-end testing. While the development cycle (build, restart Claude Desktop, test, fix code) could be streamlined, having a complete local debugging environment is more efficient than debugging against remote services.
+
+## Things I Stumble
+
+### Transport Complexity
+
+I believe the `sse` transport would be sufficient on its own. Adding the extra `stdio` transport introduces several complications:
+
+First, lifecycle management differs between the two approaches. With `stdio`, the MCP client manages the MCP server lifecycle (e.g., during debugging, the Inspector launches the MCP server). For `sse`, the MCP server manages its own lifecycle (e.g., MCP server and Inspector start separately, and later the Inspector points to the MCP server endpoint).
+
+I think most serious MCP servers need to manage their own lifecycle, especially when separate configuration is required.
+
+Using `stdio` as a communication channel is also problematic. It forces developers to use `console.error` instead of `console.log` for debugging purposes. Additionally, there's the risk of dependent libraries inadvertently writing to `stdio` and interfering with communication.
+
+Although I haven't implemented an MCP client yet, I suspect supporting both transport types complicates client implementation as well.
+
+### Routing Limitations
+
+I've identified a design issue with how the MCP host routes commands to the appropriate [MCP server, tool] pair.
+
+My database MCP server implementation accepts a DSN to connect to a database:
+
+```json
+{
+  "mcpServers": {
+    "dbhub": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@bytebase/dbhub",
+        "--transport",
+        "stdio",
+        "--dsn",
+        "postgres://postgres:postgres@localhost:5432/dbname?sslmode=disable"
+      ]
+    }
+  }
+}
+```
+
+This approach presents two problems:
+
+1. Users must load a new DBHub server for each database connection, which results in duplicate tool commands appearing in Claude Desktop.
+
+1. While I could modify the implementation to allow DBHub to handle multiple databases, it remains unclear how to instruct the MCP host to route prompts to the specific desired database.
+
+### Claude Desktop Limitations
+
+1. Having to restart Claude Desktop to load a new MCP Server is annoying during development.
+
+1. Claude Desktop [only supports the `stdio` transport](https://github.com/orgs/modelcontextprotocol/discussions/16),
+   which forced me to reluctantly implement `stdio` support in my server.
+
+1. I found [a bug](https://github.com/modelcontextprotocol/servers/issues/812).
+
+## Looking Ahead
+
+Despite these challenges, I remain satisfied with the current state of MCP and optimistic about its future.
+The [official roadmap](https://modelcontextprotocol.io/development/roadmap) outlines promising developments,
+with Hierarchical Agent Systems (through namespacing and topology awareness) being particularly interesting to me.
+This feature could address the routing limitations I encountered and provide MCP developers with improved debugging capabilities.
+
+My biggest concern right now is the core MCP team seems to be quite understaffed. The ecosystem is picking up and new issues are accumulating fast. They need more hands.
