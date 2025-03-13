@@ -15,11 +15,11 @@ export function HomeLayout({
   const getTitle = () => {
     switch (pathname) {
       case '/ja':
-        return 'MCPとは何か? (Model Context Protocol) - 入門ガイド'
+        return 'MCPとは何か？（Model Context Protocol） - 入門ガイド'
       case '/kr':
         return 'MCP란 무엇인가? (Model Context Protocol) - 입문서'
       case '/zh':
-        return '究竟什么是 MCP? (Model Context Protocol) - 入门指南'
+        return '究竟什么是 MCP？(Model Context Protocol) - 入门指南'
       case '/es':
         return '¿Qué es MCP? (Model Context Protocol) - Una Introducción'
       case '/de':
