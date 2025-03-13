@@ -74,18 +74,16 @@ export default function About() {
           <div className="mt-6 space-y-7 text-base text-zinc-600 dark:text-zinc-400">
             <p>
               Welcome to my personal learning journey about the Model Context Protocol (MCP).
-              I created this site to document my exploration of this promising standard
-              that's changing how we manage context in AI systems.
-            </p>
-            <p>
               Through this website, I'm sharing my notes, experiments, and insights as I learn.
-              You'll find explanations of core concepts, implementation examples, and practical
-              applications of MCP in real-world scenarios. I'm documenting both my successes and
-              the challenges I encounter along the way.
             </p>
             <p>
-              I'm not an expert (yet!), but rather a fellow learner on this journey. If you're
-              also interested in MCP or context management in AI systems, I hope my experiences
+              I'm not an expert (yet!), but rather a fellow learner on this journey. My day job is
+              sketching <a href="https://www.bytebase.com" className="text-teal-500 hover:text-teal-700 transition-colors">Bytebase</a>, an open-source Database DevSecOps platform. I spend my spare time
+              vibe-coding <a href="https://github.com/bytebase/dbhub/" className="text-teal-500 hover:text-teal-700 transition-colors">DBHub</a>, a universal database gateway MCP server.
+            </p>
+
+            <p>
+            I hope my experiences
               and resources will be helpful to you. Feel free to connect with me through the
               channels below to share your own insights or ask questions.
             </p>
