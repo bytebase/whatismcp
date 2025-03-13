@@ -3,6 +3,9 @@ import Image from 'next/image'
 import xkcdStandards from '@/images/posts/home/xkcd-standards.webp'
 import mcpArchitecture from '@/images/posts/home/mcp-architecture.webp'
 import mcpMembers from '@/images/posts/home/mcp-members.webp'
+import databaseMcp from '@/images/posts/home/database-mcp.webp'
+import textToSqlClassic from '@/images/posts/home/text-to-sql-classic.webp'
+import textToSqlMcp from '@/images/posts/home/text-to-sql-mcp.webp'
 
 export const metadata = {
   title: 'What is MCP? (Model Context Protocol) - A Primer',
@@ -36,9 +39,7 @@ MCP follows a client-server architecture and has five main components:
 
 <Image
   src={mcpArchitecture}
-  alt="MCP Architecture diagram showing the relationship between hosts, clients, servers, and data sources"
-  width={700}
-  height={400}
+  alt="MCP Architecture diagram showing the five main components: MCP Hosts, MCP Clients, MCP Servers, Local Data Sources, and Remote Services"
 />
 
 - **MCP Hosts**: AI Tools (Chat clients, IDEs, Agents) that want to access data through MCP.
@@ -47,16 +48,27 @@ MCP follows a client-server architecture and has five main components:
 - **Local Data Sources**: Local databases, files, and services that contain information.
 - **Remote Services**: External APIs or services that MCP servers can connect to.
 
-Let's demonstrate this by using the classic AI use case, Text-to-SQL. Text-to-SQL translates natural language to SQL. A typical implementation:
+Let's demonstrate this by using the classic AI use case, Text-to-SQL. Text-to-SQL translates natural language to SQL. Before MCP, a typical implementation:
+
+<Image
+  src={textToSqlClassic}
+  alt="Traditional Text-to-SQL implementation workflow diagram showing the four steps: schema fetching, prompt creation, SQL generation, and execution"
+/>
 
 1. SQL client fetches the schema from the target databases
-2. SQL client sends LLM a prompt containing the schema, and LLM replies with the SQL
-3. SQL client executes the SQL against the target database
+1. SQL client sends LLM a prompt containing the schema
+1. LLM replies with the SQL
+1. SQL client executes the SQL against the target database
 
-Before MCP, every SQL client needs to implement this for every supported database. With MCP, the SQL Client just needs to implement the
+Without MCP, every SQL client needs to implement this for every supported database. With MCP, the SQL client just needs to implement the
 MCP client protocol and each database vendor just needs to implement a MCP server once.
 
-Essentially, it turns an M×N problem into an M+N solution, by abstracting with another level of indirection.
+<Image
+  src={databaseMcp}
+  alt="MCP-based database integration diagram showing how SQL clients connect to different database engines through the MCP protocol layer"
+/>
+
+Essentially, it turns an M×N problem into an M+N solution, by abstracting with another level of indirection-the MCP.
 
 ### Core primitives
 
@@ -67,6 +79,11 @@ MCP is built around three fundamental primitives supplied by the MCP server:
 - **Tools**: Functions that can be executed by the language model to perform actions like querying a database, calling an API, or processing data.
 
 To map the Text-to-SQL example:
+
+<Image
+  src={textToSqlMcp}
+  alt="Text-to-SQL with MCP diagram showing how MCP primitives (Resources, Prompts, and Tools) are implemented in database context"
+/>
 
 | MCP Primitive | Text-to-SQL Example                                                       |
 | ------------- | ------------------------------------------------------------------------- |
@@ -98,9 +115,7 @@ The infamous [xkcd 927](https://xkcd.com/927/) comic reminds us of the challenge
 
 <Image
   src={xkcdStandards}
-  alt="XKCD comic #927: Standards - How standards proliferate"
-  width={550}
-  height={300}
+  alt="XKCD comic #927: Standards - Illustrating how competing standards proliferate instead of unifying"
 />
 
 However, MCP shows promising signs of genuine openness.
@@ -111,9 +126,7 @@ As of writing (Mar 13rd, 2025), the working group currently has five members:
 
 <Image
   src={mcpMembers}
-  alt="Model Context Protocol working group members"
-  width={650}
-  height={350}
+  alt="Model Context Protocol working group members showing the five contributors with their roles and affiliations"
 />
 
 Besides Alexander Sysoev from JetBrains, the other four work for Anthropic. This balance is understandable as the project is still in its early stages, and having a core team from one organization can help provide clear direction during initial development.
@@ -124,7 +137,7 @@ MCP is still in its early stages. Creating a successful protocol is similar to b
 
 However, there's reason for optimism. The MCP ecosystem appears to have overcome the initial adoption hurdle, with more agents (MCP clients) emerging and an increasing number of MCP servers being developed each week to solve domain-specific tasks.
 
-From the technical perspective, MSP mostly resembles LSP which has achieved great success in its domain. In the long term, MSP could be as important as SQL to become the lingua franca in the AI-native era.
+From the technical perspective, MSP mostly resembles LSP which has achieved great success in the coding domain. In the long term, MSP could be as important as SQL to become the lingua franca in the AI-native era.
 
 ## References
 
