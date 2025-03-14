@@ -1,32 +1,8 @@
-'use client'
-
-import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { getAvailableLanguages } from '@/lib/languages'
 
-export function LanguageSwitcher() {
-  const pathname = usePathname()
-  
-  const getBasePath = () => {
-    // Remove language prefix if present
-    if (pathname === '/ja' || pathname === '/kr') {
-      return '/'
-    }
-    return pathname
-  }
-  
-  const languages = [
-    { code: '', name: 'English', path: '' },
-    { code: 'zh', name: '中文', path: '/zh' },
-    { code: 'ja', name: '日本語', path: '/ja' },
-    { code: 'kr', name: '한국어', path: '/kr' },
-    { code: 'es', name: 'Español', path: '/es' },
-    { code: 'de', name: 'Deutsch', path: '/de' },
-    { code: 'fr', name: 'Français', path: '/fr' },
-    { code: 'hi', name: 'हिन्दी', path: '/hi' },
-    { code: 'pt', name: 'Português', path: '/pt' },
-    { code: 'vi', name: 'Tiếng Việt', path: '/vi' },
-    { code: 'ru', name: 'Русский', path: '/ru' },
-  ]
+export function LanguageSwitcher({ pathname }: { pathname: string }) {
+  const languages = getAvailableLanguages()
   
   const isActive = (path: string) => {
     if (path === '' && pathname === '/') return true
