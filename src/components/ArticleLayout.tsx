@@ -1,11 +1,12 @@
 'use client'
 
 import { useContext } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 
 import { AppContext } from '@/app/providers'
 import { Container } from '@/components/Container'
 import { Prose } from '@/components/Prose'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { type ArticleWithSlug } from '@/lib/articles'
 import { formatDate } from '@/lib/formatDate'
 
@@ -30,7 +31,17 @@ export function ArticleLayout({
   children: React.ReactNode
 }) {
   let router = useRouter()
+  let pathname = usePathname()
   let { previousPathname } = useContext(AppContext)
+
+  // Determine if we should show the language switcher
+  // Show it for any article path
+  const shouldShowLanguageSwitcher = pathname.includes('/articles/')
+  
+  // Determine which locale we're currently using
+  const currentLocale = pathname.match(/^\/([a-z]{2})\//)
+    ? pathname.match(/^\/([a-z]{2})\//)[1]
+    : undefined
 
   return (
     <Container className="mt-16 lg:mt-32">
@@ -48,15 +59,20 @@ export function ArticleLayout({
           )}
           <article>
             <header className="flex flex-col">
-              <h1 className="mt-6 text-4xl font-bold tracking-tight text-zinc-800 sm:text-5xl dark:text-zinc-100">
+              {shouldShowLanguageSwitcher && (
+                <div className="mb-4">
+                  <LanguageSwitcher pathname={pathname} />
+                </div>
+              )}
+              <h1 className="text-4xl font-bold tracking-tight text-zinc-800 sm:text-5xl dark:text-zinc-100">
                 {article.title}
               </h1>
               <time
                 dateTime={article.date}
-                className="order-first flex items-center text-base text-zinc-400 dark:text-zinc-500"
+                className="mt-3 flex items-center text-base text-zinc-400 dark:text-zinc-500"
               >
                 <span className="h-4 w-0.5 rounded-full bg-zinc-200 dark:bg-zinc-500" />
-                <span className="ml-3">{formatDate(article.date)}</span>
+                <span className="ml-3">{formatDate(article.date, currentLocale)}</span>
               </time>
             </header>
             <Prose className="mt-8" data-mdx-content>
