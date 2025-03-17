@@ -1,0 +1,98 @@
+import { ArticleLayout } from '@/components/ArticleLayout'
+
+export const article = {
+  author: 'Tianzhou',
+  date: '2025-03-13',
+  title: '实现 MCP 服务器的笔记',
+  description:
+    '从零开始实现模型上下文协议 (Model Context Protocol, MCP) 服务器的实用指南，涵盖架构决策、挑战和最佳实践。',
+}
+
+export const metadata = {
+  title: article.title,
+  description: article.description,
+}
+
+export default (props) => <ArticleLayout article={article} {...props} />
+
+基于我实现[数据库 MCP 服务器](https://github.com/bytebase/dbhub/)（使用 TypeScript 编写）的经验。
+
+## 我喜欢的方面
+
+### 选择 JSON-RPC 作为 RPC 协议
+
+MCP 的两个可行选项是 JSON-RPC 和 gRPC。我很欣赏 MCP 选择了前者。
+虽然 gRPC 效率更高，但基于 JSON 的纯文本协议更容易上手。这种
+可访问性对于 MCP 实现广泛采用很重要，也符合使开发更容易被更广泛
+受众接受的趋势。
+
+### 良好的文档
+
+[MCP 文档](https://modelcontextprotocol.io/introduction)清晰明了，有[有用的示例](https://modelcontextprotocol.io/examples)展示了实际实现。
+
+### 不错的调试工具
+
+[检查器工具](https://modelcontextprotocol.io/docs/tools/inspector)非常有价值。除了排除问题外，我还用检查器更好地理解 MCP 概念。
+
+我还使用 Claude Desktop 进行端到端测试。虽然开发周期（构建、重启 Claude Desktop、测试、修复代码）可以更流畅，但拥有完整的本地调试环境比对远程服务进行调试更高效。
+
+## 我遇到的困难
+
+### 传输复杂性
+
+我认为单独使用 `sse` 传输就足够了。增加额外的 `stdio` 传输引入了几个复杂因素：
+
+首先，两种方法的生命周期管理不同。使用 `stdio` 时，MCP 客户端管理 MCP 服务器生命周期（例如，调试时，检查器启动 MCP 服务器）。对于 `sse`，MCP 服务器管理自己的生命周期（例如，MCP 服务器和检查器单独启动，之后检查器指向 MCP 服务器端点）。
+
+我认为大多数正式的 MCP 服务器需要管理自己的生命周期，特别是当需要单独配置时。
+
+使用 `stdio` 作为通信通道也有问题。它迫使开发者使用 `console.error` 而不是 `console.log` 进行调试。此外，还有依赖库无意中写入 `stdio` 并干扰通信的风险。
+
+虽然我还没有实现 MCP 客户端，但我怀疑支持两种传输类型也会使客户端实现变得复杂。
+
+### 路由限制
+
+我发现 MCP 主机如何将命令路由到适当的 [MCP 服务器，工具] 对存在设计问题。
+
+我的数据库 MCP 服务器实现接受 DSN 连接到数据库：
+
+```json
+{
+  "mcpServers": {
+    "dbhub": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@bytebase/dbhub",
+        "--transport",
+        "stdio",
+        "--dsn",
+        "postgres://postgres:postgres@localhost:5432/dbname?sslmode=disable"
+      ]
+    }
+  }
+}
+```
+
+这种方法有两个问题：
+
+1. 用户必须为每个数据库连接加载一个新的 DBHub 服务器，这导致 Claude Desktop 中出现重复的工具命令。
+
+2. 虽然我可以修改实现以允许 DBHub 处理多个数据库，但仍不清楚如何指示 MCP 主机将提示路由到特定所需的数据库。
+
+### Claude Desktop 的限制
+
+1. 在开发过程中，必须重启 Claude Desktop 来加载新的 MCP 服务器很烦人。
+
+2. Claude Desktop [仅支持 `stdio` 传输](https://github.com/orgs/modelcontextprotocol/discussions/16)，这迫使我不得不在服务器中实现 `stdio` 支持。
+
+3. 我发现了[一个 bug](https://github.com/modelcontextprotocol/servers/issues/812)。
+
+## 展望未来
+
+尽管有这些挑战，我对 MCP 的当前状态仍然满意，并对其未来持乐观态度。
+[官方路线图](https://modelcontextprotocol.io/development/roadmap)概述了前景广阔的发展，
+其中层次化代理系统（通过命名空间和拓扑感知）对我特别有吸引力。
+这一功能可以解决我遇到的路由限制，并为 MCP 开发者提供改进的调试功能。
+
+我目前最大的担忧是核心 MCP 团队似乎人手严重不足。生态系统正在发展，新问题正在迅速积累。他们需要更多的帮手。
