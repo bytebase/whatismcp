@@ -1,6 +1,6 @@
-export function formatDate(dateString: string, locale?: string) {
+export function formatDate(dateString: string, locale?: string): string {
   // Map locale codes to actual locale strings for date formatting
-  const localeMap: { [key: string]: string } = {
+  const localeMap: Record<string, string> = {
     'zh': 'zh-CN',
     'ja': 'ja-JP',
     'kr': 'ko-KR',

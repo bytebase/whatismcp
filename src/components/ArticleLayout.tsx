@@ -27,8 +27,8 @@ export function ArticleLayout({
   article,
   children,
 }: {
-  article: ArticleWithSlug
-  children: React.ReactNode
+  article: ArticleWithSlug;
+  children: React.ReactNode;
 }) {
   let router = useRouter()
   let pathname = usePathname()
@@ -39,9 +39,8 @@ export function ArticleLayout({
   const shouldShowLanguageSwitcher = pathname.includes('/articles/')
   
   // Determine which locale we're currently using
-  const currentLocale = pathname.match(/^\/([a-z]{2})\//)
-    ? pathname.match(/^\/([a-z]{2})\//)[1]
-    : undefined
+  const localeMatch = pathname.match(/^\/([a-z]{2})\//)
+  const currentLocale = localeMatch ? localeMatch[1] : undefined
 
   return (
     <Container className="mt-16 lg:mt-32">

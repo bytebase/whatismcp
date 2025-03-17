@@ -6,7 +6,7 @@ import { getAvailableLanguages } from '@/lib/languages'
 
 // Hardcoded fallback translations for client-side rendering
 // This will be used until the data is fetched from the server
-const FALLBACK_TRANSLATIONS = {
+const FALLBACK_TRANSLATIONS: Record<string, string[]> = {
   'zh': ['notes-on-implementing-mcp-server'],
   // Add more translations as they become available
 }
@@ -51,7 +51,8 @@ export function LanguageSwitcher({ pathname }: { pathname: string }) {
     // Format could be /articles/slug or /zh/articles/slug
     const parts = pathname.split('/articles/')
     if (parts.length > 1) {
-      articleSlug = parts[1]
+      // Remove any trailing slashes
+      articleSlug = parts[1].replace(/\/$/, '')
     }
   }
 
