@@ -1,0 +1,101 @@
+import { ArticleLayout } from '@/components/ArticleLayout'
+
+export const article = {
+  author: 'Tianzhou',
+  date: '2025-03-13',
+  title: 'Notes sur l\'implémentation d\'un serveur MCP',
+  description:
+    'Un guide pratique sur l\'implémentation d\'un serveur de Protocole de Contexte de Modèle (MCP) à partir de zéro, couvrant les décisions d\'architecture, les défis et les meilleures pratiques.',
+}
+
+export const metadata = {
+  title: article.title,
+  description: article.description,
+}
+
+export default (props) => <ArticleLayout article={article} {...props} />
+
+Basé sur mon expérience d'implémentation d'un [serveur MCP de base de données](https://github.com/bytebase/dbhub/) écrit en TypeScript.
+
+## Ce que j'apprécie
+
+### Choisir JSON-RPC comme protocole RPC
+
+Les deux options viables pour MCP étaient JSON-RPC et gRPC. J'apprécie que MCP ait choisi le premier.
+Bien que gRPC soit plus efficace, un protocole texte brut basé sur JSON est plus accessible. Cette
+accessibilité est importante pour que MCP réalise une adoption généralisée et s'aligne avec la tendance de
+rendre le développement plus accessible à un public plus large.
+
+### Bonne documentation
+
+La [documentation MCP](https://modelcontextprotocol.io/introduction) est claire, avec [des exemples utiles](https://modelcontextprotocol.io/examples) qui démontrent des implémentations pratiques.
+
+### Outils de débogage convenables
+
+L'[outil Inspecteur](https://modelcontextprotocol.io/docs/tools/inspector) a été inestimable. Au-delà de la résolution des problèmes, j'ai utilisé l'Inspecteur pour mieux comprendre les concepts MCP.
+
+J'utilise également Claude Desktop pour les tests de bout en bout. Bien que le cycle de développement (build, redémarrage de Claude Desktop, test, correction du code) pourrait être optimisé, avoir un environnement de débogage local complet est plus efficace que le débogage contre des services distants.
+
+## Les difficultés rencontrées
+
+### Complexité du transport
+
+> Mise à jour : Avec la [mise à jour du protocole du 2025-03-26](https://github.com/modelcontextprotocol/specification/pull/206), HTTP Streamable est le défaut et SSE devient maintenant optionnel.
+
+Je pense que le transport `sse` serait suffisant à lui seul. L'ajout du transport supplémentaire `stdio` introduit plusieurs complications :
+
+D'abord, la gestion du cycle de vie diffère entre les deux approches. Avec `stdio`, le client MCP gère le cycle de vie du serveur MCP (par exemple, pendant le débogage, l'Inspecteur lance le serveur MCP). Pour `sse`, le serveur MCP gère son propre cycle de vie (par exemple, le serveur MCP et l'Inspecteur démarrent séparément, et plus tard l'Inspecteur pointe vers le point d'accès du serveur MCP).
+
+Je pense que la plupart des serveurs MCP sérieux doivent gérer leur propre cycle de vie, surtout lorsqu'une configuration séparée est requise.
+
+L'utilisation de `stdio` comme canal de communication est également problématique. Cela force les développeurs à utiliser `console.error` au lieu de `console.log` à des fins de débogage. De plus, il y a le risque que des bibliothèques dépendantes écrivent par inadvertance sur `stdio` et interfèrent avec la communication.
+
+Bien que je n'ai pas encore implémenté un client MCP, je soupçonne que la prise en charge des deux types de transport complique également l'implémentation du client.
+
+### Limitations de routage
+
+J'ai identifié un problème de conception avec la façon dont l'hôte MCP achemine les commandes vers la paire [serveur MCP, outil] appropriée.
+
+Mon implémentation de serveur MCP de base de données accepte un DSN pour se connecter à une base de données :
+
+```json
+{
+  "mcpServers": {
+    "dbhub": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@bytebase/dbhub",
+        "--transport",
+        "stdio",
+        "--dsn",
+        "postgres://postgres:postgres@localhost:5432/dbname?sslmode=disable"
+      ]
+    }
+  }
+}
+```
+
+Cette approche présente deux problèmes :
+
+1. Les utilisateurs doivent charger un nouveau serveur DBHub pour chaque connexion de base de données, ce qui entraîne l'apparition de commandes d'outils en double dans Claude Desktop.
+
+1. Bien que je puisse modifier l'implémentation pour permettre à DBHub de gérer plusieurs bases de données, il reste difficile de savoir comment instruire l'hôte MCP pour acheminer les invites vers la base de données spécifique souhaitée.
+
+### Limitations de Claude Desktop
+
+1. Devoir redémarrer Claude Desktop pour charger un nouveau serveur MCP est ennuyeux pendant le développement.
+
+1. Claude Desktop [ne prend en charge que le transport `stdio`](https://github.com/orgs/modelcontextprotocol/discussions/16),
+   ce qui m'a forcé à implémenter à contrecœur le support `stdio` dans mon serveur.
+
+1. J'ai trouvé [un bug](https://github.com/modelcontextprotocol/servers/issues/812).
+
+## Regard vers l'avenir
+
+Malgré ces défis, je reste satisfait de l'état actuel de MCP et optimiste quant à son avenir.
+La [feuille de route officielle](https://modelcontextprotocol.io/development/roadmap) décrit des développements prometteurs,
+les Systèmes d'Agents Hiérarchiques (à travers l'espace de noms et la conscience topologique) étant particulièrement intéressants pour moi.
+Cette fonctionnalité pourrait résoudre les limitations de routage que j'ai rencontrées et fournir aux développeurs MCP des capacités de débogage améliorées.
+
+Ma plus grande préoccupation en ce moment est que l'équipe centrale MCP semble être assez en sous-effectif. L'écosystème se développe et de nouveaux problèmes s'accumulent rapidement. Ils ont besoin de plus de mains.

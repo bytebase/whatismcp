@@ -1,0 +1,100 @@
+import { ArticleLayout } from '@/components/ArticleLayout'
+
+export const article = {
+  author: 'Tianzhou',
+  date: '2025-03-13',
+  title: 'MCP サーバーの実装に関するメモ',
+  description:
+    'ゼロからモデルコンテキストプロトコル (MCP) サーバーを実装するための実践的なガイドで、アーキテクチャの決定、課題、ベストプラクティスを網羅しています。',
+}
+
+export const metadata = {
+  title: article.title,
+  description: article.description,
+}
+
+export default (props) => <ArticleLayout article={article} {...props} />
+
+TypeScriptで書かれた[データベースMCPサーバー](https://github.com/bytebase/dbhub/)を実装した経験に基づいています。
+
+## 良いと思う点
+
+### RPCプロトコルとしてJSON-RPCを選択
+
+MCPには、JSON-RPCとgRPCの2つの実行可能なオプションがありました。前者を選んだことを評価しています。
+gRPCの方が効率的ですが、JSONベースのプレーンテキストプロトコルの方がアプローチしやすいです。
+この利便性は、MCPが広く採用され、開発をより広い層に利用できるようにするトレンドに合致して重要です。
+
+### 優れたドキュメント
+
+[MCPドキュメント](https://modelcontextprotocol.io/introduction)は明確で、実装例を示す[役立つ例](https://modelcontextprotocol.io/examples)があります。
+
+### 十分なデバッグツール
+
+[インスペクターツール](https://modelcontextprotocol.io/docs/tools/inspector)は非常に貴重でした。問題のトラブルシューティングだけでなく、MCP概念をより深く理解するためにも使用しました。
+
+また、エンドツーエンドテスト用にClaude Desktopも使用しています。開発サイクル（ビルド、Claude Desktopの再起動、テスト、コードの修正）は合理化できる可能性がありますが、完全なローカルデバッグ環境があることはリモートサービスに対するデバッグよりも効率的です。
+
+## 苦労した点
+
+### トランスポートの複雑さ
+
+> 更新: [2025-03-26のプロトコル更新](https://github.com/modelcontextprotocol/specification/pull/206)により、Streamable HTTPがデフォルトになり、SSEはオプションになりました。
+
+`sse`トランスポートだけで十分だと思います。追加の`stdio`トランスポートを導入すると、いくつかの複雑な問題が発生します：
+
+まず、2つのアプローチではライフサイクル管理が異なります。`stdio`では、MCPクライアントがMCPサーバーのライフサイクルを管理します（例：デバッグ中、インスペクターがMCPサーバーを起動する）。`sse`では、MCPサーバーが自身のライフサイクルを管理します（例：MCPサーバーとインスペクターが別々に起動し、後でインスペクターがMCPサーバーのエンドポイントを指定する）。
+
+ほとんどの本格的なMCPサーバーは、特に別途設定が必要な場合、自身のライフサイクルを管理する必要があると思います。
+
+コミュニケーションチャネルとして`stdio`を使用することも問題です。デバッグのために`console.log`ではなく`console.error`を使用することを開発者に強制します。また、依存ライブラリが誤って`stdio`に書き込み、通信を妨げるリスクもあります。
+
+MCPクライアントをまだ実装していませんが、両方のトランスポートタイプをサポートすることでクライアント実装も複雑になると思います。
+
+### ルーティングの制限
+
+MCPホストが適切な[MCPサーバー、ツール]ペアにコマンドをルーティングする方法に関する設計上の問題を特定しました。
+
+私のデータベースMCPサーバー実装は、データベースに接続するためのDSNを受け入れます：
+
+```json
+{
+  "mcpServers": {
+    "dbhub": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@bytebase/dbhub",
+        "--transport",
+        "stdio",
+        "--dsn",
+        "postgres://postgres:postgres@localhost:5432/dbname?sslmode=disable"
+      ]
+    }
+  }
+}
+```
+
+このアプローチには2つの問題があります：
+
+1. ユーザーは各データベース接続に対して新しいDBHubサーバーをロードする必要があり、その結果、Claude Desktopに重複したツールコマンドが表示されます。
+
+1. DBHubが複数のデータベースを処理できるように実装を変更できますが、MCPホストに特定の目的のデータベースにプロンプトをルーティングするよう指示する方法が不明確です。
+
+### Claude Desktopの制限
+
+1. 開発中にClaude Desktopを再起動して新しいMCPサーバーをロードする必要があるのは面倒です。
+
+1. Claude Desktopは[`stdio`トランスポートのみをサポート](https://github.com/orgs/modelcontextprotocol/discussions/16)しており、
+   これによりサーバーに`stdio`サポートを実装せざるを得なくなりました。
+
+1. [バグ](https://github.com/modelcontextprotocol/servers/issues/812)を発見しました。
+
+## 今後の展望
+
+これらの課題にもかかわらず、MCPの現状に満足し、その将来性に楽観的です。
+[公式ロードマップ](https://modelcontextprotocol.io/development/roadmap)には有望な開発が概説されており、
+特に（名前空間とトポロジーの認識を通じた）階層的エージェントシステムに興味を持っています。
+この機能は、私が遭遇したルーティングの制限に対処し、MCP開発者に改善されたデバッグ機能を提供する可能性があります。
+
+現時点での最大の懸念は、コアMCPチームが人手不足のように見えることです。エコシステムは急速に成長しており、新しい問題が急速に蓄積しています。彼らはより多くの支援が必要です。

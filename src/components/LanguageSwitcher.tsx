@@ -8,6 +8,15 @@ import { getAvailableLanguages } from '@/lib/languages'
 // This will be used until the data is fetched from the server
 const FALLBACK_TRANSLATIONS: Record<string, string[]> = {
   'zh': ['notes-on-implementing-mcp-server'],
+  'ja': ['notes-on-implementing-mcp-server'],
+  'kr': ['notes-on-implementing-mcp-server'],
+  'es': ['notes-on-implementing-mcp-server'],
+  'fr': ['notes-on-implementing-mcp-server'],
+  'de': ['notes-on-implementing-mcp-server'],
+  'hi': ['notes-on-implementing-mcp-server'],
+  'pt': ['notes-on-implementing-mcp-server'],
+  'vi': ['notes-on-implementing-mcp-server'],
+  'ru': ['notes-on-implementing-mcp-server'],
   // Add more translations as they become available
 }
 
