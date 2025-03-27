@@ -38,6 +38,8 @@ MCP 的两个可行选项是 JSON-RPC 和 gRPC。我庆幸 MCP 选择了前者�
 
 ### Transport 的复杂性
 
+> 更新：随着 [2025-03-26 协议更新](https://github.com/modelcontextprotocol/specification/pull/206)，Streamable HTTP 现在是默认选项，而 SSE 变成了可选项。
+
 我认为 Transport 只要提供 `sse` 就足够了。增加额外的 `stdio` 传输引入了几个复杂因素：
 
 首先，两种方法的生命周期管理不同。使用 `stdio` 时，MCP 客户端管理 MCP 服务器生命周期（例如，调试时，Inspector 启动 MCP 服务器）。对于 `sse`，MCP 服务器管理自己的生命周期（例如，MCP 服务器和 Inspector 单独启动，之后 Inspector 指向 MCP 服务器端点）。

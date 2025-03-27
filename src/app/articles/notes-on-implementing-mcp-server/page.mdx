@@ -40,6 +40,8 @@ I also use Claude Desktop for end-to-end testing. While the development cycle (b
 
 ### Transport Complexity
 
+> Update: With the [2025-03-26 protocol update](https://github.com/modelcontextprotocol/specification/pull/206), Streamable HTTP is the default and SSE now becomes optional.
+
 I believe the `sse` transport would be sufficient on its own. Adding the extra `stdio` transport introduces several complications:
 
 First, lifecycle management differs between the two approaches. With `stdio`, the MCP client manages the MCP server lifecycle (e.g., during debugging, the Inspector launches the MCP server). For `sse`, the MCP server manages its own lifecycle (e.g., MCP server and Inspector start separately, and later the Inspector points to the MCP server endpoint).
