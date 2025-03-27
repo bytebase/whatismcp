@@ -4,45 +4,81 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { getAvailableLanguages } from '@/lib/languages'
 
-// Hardcoded fallback translations for client-side rendering
-// This will be used until the data is fetched from the server
-const FALLBACK_TRANSLATIONS: Record<string, string[]> = {
-  'zh': ['notes-on-implementing-mcp-server'],
-  'ja': ['notes-on-implementing-mcp-server'],
-  'kr': ['notes-on-implementing-mcp-server'],
-  'es': ['notes-on-implementing-mcp-server'],
-  'fr': ['notes-on-implementing-mcp-server'],
-  'de': ['notes-on-implementing-mcp-server'],
-  'hi': ['notes-on-implementing-mcp-server'],
-  'pt': ['notes-on-implementing-mcp-server'],
-  'vi': ['notes-on-implementing-mcp-server'],
-  'ru': ['notes-on-implementing-mcp-server'],
-  // Add more translations as they become available
+// Empty fallback translations for initial state
+const EMPTY_TRANSLATIONS: Record<string, string[]> = {
+  'zh': [],
+  'ja': [],
+  'kr': [],
+  'es': [],
+  'fr': [],
+  'de': [],
+  'hi': [],
+  'pt': [],
+  'vi': [],
+  'ru': [],
 }
 
 export function LanguageSwitcher({ pathname }: { pathname: string }) {
   const languages = getAvailableLanguages()
-  const [translations, setTranslations] = useState<Record<string, string[]>>(FALLBACK_TRANSLATIONS)
+  const [translations, setTranslations] = useState<Record<string, string[]>>(EMPTY_TRANSLATIONS)
   const [isLoaded, setIsLoaded] = useState(false)
   
-  // Fetch available translations when component mounts
+  // Fetch available translations when component mounts or pathname changes
   useEffect(() => {
     async function fetchTranslations() {
       try {
-        // In a production Next.js app, this would be a proper API endpoint
-        // For now, we'll use our hardcoded fallback data
-        setTranslations(FALLBACK_TRANSLATIONS)
+        // In a production Next.js app, this would call a proper API endpoint
+        const response = await fetch('/api/article-translations')
+        if (response.ok) {
+          const data = await response.json()
+          setTranslations(data)
+        } else {
+          // Check if translations exist by checking file system
+          // This is a client-side implementation, so we'll need to dynamically check
+          checkForTranslations()
+        }
         setIsLoaded(true)
       } catch (error) {
         console.error('Failed to load article translations:', error)
-        // Use fallback data in case of error
-        setTranslations(FALLBACK_TRANSLATIONS)
+        // Use dynamic check in case of error
+        checkForTranslations()
         setIsLoaded(true)
       }
     }
     
+    // Function to check for translations by dynamically testing file existence
+    async function checkForTranslations() {
+      const newTranslations: Record<string, string[]> = { ...EMPTY_TRANSLATIONS }
+      
+      // Extract the current article slug if on an article page
+      if (pathname.includes('/articles/')) {
+        const parts = pathname.split('/articles/')
+        if (parts.length > 1) {
+          const articleSlug = parts[1].replace(/\/$/, '')
+          
+          // For each language, check if the translation exists
+          for (const lang of Object.keys(newTranslations)) {
+            try {
+              // Try to fetch the head of the file to see if it exists
+              // This is a simple method to check if a file exists
+              const testPath = `/${lang}/articles/${articleSlug}`
+              const test = await fetch(testPath, { method: 'HEAD' })
+              if (test.ok) {
+                newTranslations[lang].push(articleSlug)
+              }
+            } catch (e) {
+              // If fetch fails, the translation probably doesn't exist
+              // Just continue to the next language
+            }
+          }
+        }
+      }
+      
+      setTranslations(newTranslations)
+    }
+    
     fetchTranslations()
-  }, [])
+  }, [pathname])
   
   const isActive = (path: string) => {
     if (path === '' && pathname === '/') return true

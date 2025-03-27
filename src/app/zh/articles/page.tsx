@@ -46,11 +46,10 @@ async function moduleExists(path: string): Promise<boolean> {
 export default async function ArticlesIndex() {
   const articles = await getAllArticles()
   
-  // In a real-world scenario, we would use a more robust solution like the
-  // getArticleTranslations function we created earlier
-  
-  // For now, we'll just hardcode the articles we know have translations
-  const translatedSlugs = ['notes-on-implementing-mcp-server']
+  // Get available translations for Chinese
+  const { getArticleTranslations } = await import('@/lib/articles')
+  const translations = await getArticleTranslations()
+  const translatedSlugs = translations['zh'] || []
   
   // Filter to only include articles that have a Chinese translation
   const chineseArticles = articles.filter(article => 

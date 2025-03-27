@@ -48,17 +48,19 @@ export async function getArticleTranslations() {
   // Check for translated articles for each language
   for (const lang of supportedLanguages) {
     try {
+      // Look for article directories within each language's articles directory
       const langArticlePaths = await glob('*/page.mdx', {
         cwd: `./src/app/${lang}/articles`,
       });
       
-      // Extract slugs from paths
+      // Extract slugs from paths (e.g., "notes-on-implementing-mcp-server/page.mdx" -> "notes-on-implementing-mcp-server")
       const translatedSlugs = langArticlePaths.map(path => 
         path.replace(/(\/page)?\.mdx$/, '')
       );
       
       translations[lang] = translatedSlugs;
     } catch (error) {
+      console.error(`Error scanning articles for ${lang}:`, error);
       // If directory doesn't exist or can't be read, leave as empty array
       translations[lang] = [];
     }
