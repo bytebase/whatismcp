@@ -16,10 +16,10 @@ const projects = [
     logo: logoDBHub,
   },
   {
-    name: 'Brave Search MCP Server',
+    name: 'Browserbase MCP Server',
     description:
-      'An MCP server that integrates the Brave Search API, providing web and local search.',
-    link: { href: 'https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search', label: '@modelcontextprotocol/server-brave-search' },
+      'An MCP server that provides cloud browser automation capabilities',
+    link: { href: 'https://github.com/browserbase/mcp-server-browserbase', label: '@browserbasehq/mcp-browserbase' },
     logo: logoPlanetaria,
   },
   {
