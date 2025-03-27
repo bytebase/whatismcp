@@ -23,6 +23,13 @@ const projects = [
     logo: logoPlanetaria,
   },
   {
+    name: 'hyper-mcp',
+    description:
+      'A powerful MCP server that leverages WebAssembly plugins to extend its capabilities',
+    link: { href: 'https://github.com/tuananh/hyper-mcp', label: 'tuananh/hyper-mcp' },
+    logo: logoPlanetaria,
+  },
+  {
     name: 'Awesome MCP Servers',
     description:
       'A curated list of awesome Model Context Protocol (MCP) servers.',
