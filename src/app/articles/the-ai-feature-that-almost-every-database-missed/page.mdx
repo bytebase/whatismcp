@@ -1,0 +1,51 @@
+import { ArticleLayout } from '@/components/ArticleLayout'
+
+export const article = {
+  author: 'Tianzhou',
+  date: '2025-04-11',
+  title: 'The AI Feature That Almost Every Database Missed',
+  description:
+    'It just occurred to me: it’s a fairly basic feature that the ‘big four’ (Oracle, SQL Server, PostgreSQL, MySQL) don’t support natively. Only Snowflake does..',
+}
+
+export const metadata = {
+  title: article.title,
+  description: article.description,
+}
+
+export default (props) => <ArticleLayout article={article} {...props} />
+
+
+
+While every database vendor rushed to VECTORIZE their products, there's another key feature that seems to be ignored - one that's at least as important as vector capabilities for AI.
+I did some quick research and found that only [Snowflake supports](https://docs.snowflake.com/en/sql-reference/sql/create-tag) it natively:
+
+```sql
+CREATE TAG data_sensitivity;
+ALTER TABLE customer_features SET TAG data_sensitivity = 'high';
+```
+
+**It's the ability to attach arbitrary metadata to database objects in a structured way.**
+
+This capability would allow organizations to store annotations directly alongside the database objects they describe.
+Such contextual information is increasingly critical as AI systems become more integrated with enterprise data infrastructure,
+requiring rich metadata to ensure proper governance, explainability, and compliance. To phrase it in AI-speak, it's all about providing **CONTEXT**.
+
+Let's look at the big four databases according to the [DB-Engines ranking](https://db-engines.com/en/ranking):
+
+**Oracle**: Oracle Database offers limited metadata support through its Data Dictionary and user-defined properties in Oracle Multimedia.
+However, it lacks a comprehensive, flexible system for attaching arbitrary metadata to standard database objects like tables, columns, and views.
+
+**SQL Server**: Microsoft SQL Server provides extended properties through the [sp_addextendedproperty](https://learn.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-addextendedproperty-transact-sql) stored procedure. This comes closest among traditional RDBMSs to offering metadata attachment.
+
+**MySQL**: Nothing here. Nada.
+
+**PostgreSQL**: [SECURITY LABEL](https://www.postgresql.org/docs/current/sql-security-label.html) is the closest thing, but it wasn't built for this purpose.
+
+The common hack is to use `COMMENT`. The problem with `COMMENT` is it's just a plain text field that's very easy to mess up if developers, DBAs, security teams, and data engineers all want to add their favorite metadata.
+
+Part of the blame falls on the SQL Standard, which doesn't define this capability. Snowflake probably supports it because classifying database objects is critical for data warehouse use cases.
+
+Providing context to LLMs is becoming a primary use case for databases. I wish Snowflake's `CREATE TAG`-like syntax would be incorporated into future database systems.
+
+After all, in the age of AI, context isn't just king - it's the whole kingdom.
